@@ -55,7 +55,7 @@ object SchoolModel:
        * Note!! If there are duplicates, just return them once
        * @return the list of courses
        */
-      def courses: Sequence[String]
+      def courses(): Sequence[String]
       /**
        * This method should return the list of teachers
        * e.g.,
@@ -68,7 +68,7 @@ object SchoolModel:
        * Note!! If there are duplicates, just return them once
        * @return the list of teachers
        */
-      def teachers: Sequence[String]
+      def teachers(): Sequence[String]
       /**
        * This method should return a new school with the teacher assigned to the course
        * e.g.,
@@ -114,51 +114,57 @@ object SchoolModel:
 
     import Sequence.*
 
-    case class PairTeacherCourse(teacher: Teacher, course: Course)
+    // case class TeacherToCourse(teacher: Teacher, course: Course)
 
-    override type School = (Sequence[String], Sequence[String], Sequence[PairTeacherCourse])
-    override type Teacher = School
-    override type Course = School
+    override type School = Sequence[(Teacher, Course)]
+    override type Teacher = String
+    override type Course = String
 
-    def teacher(name: String): Teacher = (Cons(name, Nil()), Nil(), Nil())
-    def course(name: String): Course = (Nil(), Cons(name, Nil()), Nil())
-    def emptySchool: School = (Nil(), Nil(), Nil())
+    def teacher(name: String): Teacher = name
+    def course(name: String): Course = name
+    def emptySchool: School = Nil()
 
     extension (school: School)
-      def courses: Sequence[String] = school match
-        case (t, _, _) => t
+      def courses(): Sequence[String] = school match
+        case Cons((_, c), tail) => cons(c, tail.courses()).distinct
+        case _ => Nil()
 
-      def teachers: Sequence[String] = school match
-        case (_, c, _) => c
+      def teachers(): Sequence[String] = school match
+        case Cons((t, _), tail) => cons(t, tail.teachers()).distinct
+        case _ => Nil()
 
       def setTeacherToCourse(teacher: Teacher, course: Course): School = school match
-        case (_, _, tc) => (teachers, courses, Cons(PairTeacherCourse(teacher, course), tc))
+        case Cons(h, t) => cons(h, t.setTeacherToCourse(teacher, course))
+        case _ => cons((teacher, course), Nil())
 
-      def coursesOfATeacher(teacher: Teacher): Sequence[Course] = ???
+      def coursesOfATeacher(teacher: Teacher): Sequence[Course] =
+        school.filter((t, _) => t == teacher).courses()
 
-      def hasTeacher(name: String): Boolean = ???
+      def hasTeacher(name: String): Boolean =
+        school.teachers().contains(name)
 
-      def hasCourse(name: String): Boolean = ???
+      def hasCourse(name: String): Boolean =
+        school.courses().contains(name)
 
 @main def examples(): Unit =
   import SchoolModel.BasicSchoolModule.*
   val school = emptySchool
-  println(school.teachers) // Nil()
-  println(school.courses) // Nil()
+  println(school.teachers()) // Nil()
+  println(school.courses()) // Nil()
   println(school.hasTeacher("John")) // false
   println(school.hasCourse("Math")) // false
   val john = teacher("John")
   val math = course("Math")
   val italian = course("Italian")
   val school2 = school.setTeacherToCourse(john, math)
-  println(school2.teachers) // Cons("John", Nil())
-  println(school2.courses) // Cons("Math", Nil())
+  println(school2.teachers()) // Cons("John", Nil())
+  println(school2.courses()) // Cons("Math", Nil())
   println(school2.hasTeacher("John")) // true
   println(school2.hasCourse("Math")) // true
   println(school2.hasCourse("Italian")) // false
   val school3 = school2.setTeacherToCourse(john, italian)
-  println(school3.teachers) // Cons("John", Nil())
-  println(school3.courses) // Cons("Math", Cons("Italian", Nil()))
+  println(school3.teachers()) // Cons("John", Nil())
+  println(school3.courses()) // Cons("Math", Cons("Italian", Nil()))
   println(school3.hasTeacher("John")) // true
   println(school3.hasCourse("Math")) // true
   println(school3.hasCourse("Italian")) // true

@@ -34,6 +34,26 @@ object Sequences:
         case Cons(h, t) => Cons(h, t.concat(other))
         case Nil()      => other
 
+      def contains(elem: A): Boolean = l match
+        case Cons(h, _) if h == elem => true
+        case Cons(_, t) => t.contains(elem)
+        case _ => false
+
+      def reverse: Sequence[A] =
+        @annotation.tailrec
+        def _rev[A](s: Sequence[A], r: Sequence[A]): Sequence[A] = s match
+          case Cons(h, t) => _rev(t, Cons(h, r))
+          case _ => r
+        _rev(l, Nil())
+
+      def distinct: Sequence[A] =
+        @annotation.tailrec
+        def _dist(s: Sequence[A], singulars: Sequence[A]): Sequence[A] = s match
+          case Cons(h, t) if !singulars.contains(h) => _dist(t, Cons(h, singulars))
+          case Cons(_, t) => _dist(t, singulars)
+          case _ => singulars.reverse
+        _dist(l, Nil())
+
 
     def of[A](n: Int, a: A): Sequence[A] =
       if (n == 0) then Nil[A]() else Cons(a, of(n - 1, a))
