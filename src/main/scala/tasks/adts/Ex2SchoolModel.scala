@@ -114,9 +114,9 @@ object SchoolModel:
 
     import Sequence.*
 
-    // case class TeacherToCourse(teacher: Teacher, course: Course)
+    case class TeacherToCourse(teacher: Teacher, course: Course)
 
-    override type School = Sequence[(Teacher, Course)]
+    override type School = Sequence[TeacherToCourse]
     override type Teacher = String
     override type Course = String
 
@@ -126,19 +126,19 @@ object SchoolModel:
 
     extension (school: School)
       def courses(): Sequence[String] = school match
-        case Cons((_, c), tail) => cons(c, tail.courses()).distinct
+        case Cons(TeacherToCourse(_, c), tail) => cons(c, tail.courses()).distinct
         case _ => Nil()
 
       def teachers(): Sequence[String] = school match
-        case Cons((t, _), tail) => cons(t, tail.teachers()).distinct
+        case Cons(TeacherToCourse(t, _), tail) => cons(t, tail.teachers()).distinct
         case _ => Nil()
 
       def setTeacherToCourse(teacher: Teacher, course: Course): School = school match
         case Cons(h, t) => cons(h, t.setTeacherToCourse(teacher, course))
-        case _ => cons((teacher, course), Nil())
+        case _ => cons(TeacherToCourse(teacher, course), Nil())
 
       def coursesOfATeacher(teacher: Teacher): Sequence[Course] =
-        school.filter((t, _) => t == teacher).courses()
+        school.filter(_ match { case TeacherToCourse(t, _) => t == teacher }).courses()
 
       def hasTeacher(name: String): Boolean =
         school.teachers().contains(name)
