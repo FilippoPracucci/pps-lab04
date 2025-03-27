@@ -29,14 +29,10 @@ object Ex3Stacks:
     def empty[A]: Stack[A] = Nil()
 
     extension [A](stack: Stack[A])
-      def push(a: A): Stack[A] = stack match
-        case Cons(h, t) => Cons(a, Cons(h, t))
-        case _ => Cons(a, Nil())
+      def push(a: A): Stack[A] = Cons(a, stack)
 
       def pop(): Optional[(A, Stack[A])] = stack match
         case Cons(h, t) => Just(h, t)
         case Nil() => Optional.Empty()
 
-      def asSequence(): Sequence[A] = stack match
-        case Cons(h, t) => Cons(h, t)
-        case _ => Nil()
+      def asSequence(): Sequence[A] = stack
