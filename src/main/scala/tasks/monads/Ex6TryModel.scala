@@ -35,7 +35,7 @@ object Ex6TryModel:
 
     extension [A](m: Try[A])
       override def flatMap[B](f: A => Try[B]): Try[B] = m match
-        case TryImpl.Success(v) => f(v)
+        case TryImpl.Success(value) => f(value)
         case TryImpl.Failure(e) => failure(e)
 
 @main def main: Unit = 

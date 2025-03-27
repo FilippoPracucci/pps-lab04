@@ -21,6 +21,9 @@ object Ex5Traversable:
 
   def log[A](a: A): Unit = println("The next element is: " + a)
 
+  trait Traversable[T[_]]:
+    def consumer[A](t: T[A])(c: A => Unit): Unit
+
   def logAll[T[_]: Traversable, A](t: T[A]): Unit =
     val traversable = summon[Traversable[T]]
     traversable.consumer(t)(log(_))
@@ -28,9 +31,6 @@ object Ex5Traversable:
   def printAll[T[_]: Traversable, A](t: T[A]): Unit =
     val traversable = summon[Traversable[T]]
     traversable.consumer(t)(println(_))
-
-  trait Traversable[T[_]]:
-    def consumer[A](t: T[A])(c: A => Unit): Unit
 
   given Traversable[Sequence] with
     def consumer[A](seq: Sequence[A])(c: A => Unit): Unit = seq match
